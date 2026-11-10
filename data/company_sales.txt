@@ -1,0 +1,25 @@
+=== ACME TECH CORP - ANNUAL FINANCIAL SUMMARY (2025) ===
+Quarter 1 (Q1):
+  - Revenue: $4,500,000 USD
+  - Operating Costs: $2,800,000 USD
+  - Active Users: 120,000
+
+Quarter 2 (Q2):
+  - Revenue: $6,300,000 USD
+  - Operating Costs: $3,200,000 USD
+  - Active Users: 165,000
+
+Quarter 3 (Q3):
+  - Revenue: $7,100,000 USD
+  - Operating Costs: $3,900,000 USD
+  - Active Users: 190,000
+
+Quarter 4 (Q4):
+  - Revenue: $9,400,000 USD
+  - Operating Costs: $4,500,000 USD
+  - Active Users: 240,000
+
+Key Notes:
+- Expansion into European markets drove Q2-Q4 acceleration.
+- R&D expenditure increased by 15% year-over-year.
+
