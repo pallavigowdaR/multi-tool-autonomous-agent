@@ -281,7 +281,8 @@ def interactive_console():
     print(f"  2. 🧮 Python Math Calculator")
     print(f"  3. 📂 Local File Reader\n")
     print(f"Commands:")
-    print(f"  - Type 'demo' to run a compound multi-step test query.")
+    print(f"  - Type 'demo' to run a compound multi-step test query (requires API credits).")
+    print(f"  - Type 'simulate' to run the multi-step reasoning demo without API keys.")
     print(f"  - Type 'exit' or 'quit' to terminate.\n")
 
     agent_executor = create_autonomous_agent()
@@ -295,6 +296,10 @@ def interactive_console():
             if user_input.lower() in ["exit", "quit", "q"]:
                 print(f"\n{GREEN}Goodbye! 👋{RESET}")
                 break
+
+            if user_input.lower() in ["simulate", "sim", "offline"]:
+                run_simulated_demo()
+                continue
 
             if user_input.lower() == "demo":
                 user_input = (
