@@ -101,13 +101,105 @@ def initialize_llm():
         return ChatGroq(model=model_name, temperature=0)
 
     # Missing API keys
-    print(f"\n{RED}{BOLD}Error: No LLM API key detected!{RESET}")
-    print(f"Please configure your `.env` file with one of the following:")
+    print(f"\n{YELLOW}{BOLD}Notice: No LLM API key detected in environment!{RESET}")
+    print(f"You can configure an API key in your `.env` file:")
     print(f"  - OPENAI_API_KEY=your_key (for OpenAI gpt-4o-mini)")
     print(f"  - GOOGLE_API_KEY=your_key (for Google Gemini)")
     print(f"  - GROQ_API_KEY=your_key (for Groq Llama 3.3)")
-    print(f"\nSee .env.example for a ready-to-use template.\n")
-    sys.exit(1)
+    print(f"\n{CYAN}Would you like to run the Offline Multi-Step Simulation Demo? (Y/n){RESET}: ", end="")
+    choice = input().strip().lower()
+    if choice in ["", "y", "yes"]:
+        run_simulated_demo()
+        sys.exit(0)
+    else:
+        print(f"\nPlease configure `.env` and rerun. Exiting.\n")
+        sys.exit(0)
+
+
+def run_simulated_demo():
+    """
+    Runs a live demonstration of the multi-tool reasoning chain without requiring an LLM API key.
+    Executes actual tools (file reading, math calculation, real-time web search) sequentially.
+    """
+    import time
+    from tools import local_file_reader, python_calculator, web_search
+
+    sample_query = (
+        "Please read 'data/company_sales.txt', compute the percentage revenue growth from Q1 to Q2, "
+        "and search DuckDuckGo for SaaS industry average growth to compare."
+    )
+
+    print(f"\n{'=' * 75}")
+    print(f"{CYAN}{BOLD}📥 RUNNING SIMULATED COMPOUND QUERY:{RESET}")
+    print(f"  {sample_query}")
+    print(f"{'=' * 75}\n")
+    time.sleep(1)
+
+    print(f"{CYAN}{BOLD}🧠 [THOUGHT 1]{RESET}: The user needs to analyze quarterly revenue growth. First, I need to read the local data file 'data/company_sales.txt' to retrieve the revenue values for Q1 and Q2.")
+    time.sleep(1)
+
+    print(f"\n{YELLOW}{BOLD}⚡ [ACTION 1 / TOOL INVOKED]{RESET}")
+    print(f"  {BOLD}Tool:{RESET} {CYAN}local_file_reader{RESET}")
+    print(f"  {BOLD}Input:{RESET} data/company_sales.txt")
+
+    file_result = local_file_reader.invoke({"file_path": "data/company_sales.txt"})
+    time.sleep(1)
+    
+    print(f"\n{MAGENTA}{BOLD}🔍 [OBSERVATION 1]{RESET}")
+    lines = [line.strip() for line in file_result.splitlines() if "Revenue:" in line]
+    print(f"  Extracted records: {', '.join(lines[:2])}")
+
+    print(f"\n{CYAN}{BOLD}🧠 [THOUGHT 2]{RESET}: Q1 Revenue is $4,500,000 USD and Q2 Revenue is $6,300,000 USD. Now I will use the Python math calculator to compute the exact quarter-over-quarter percentage growth using the formula: ((Q2 - Q1) / Q1) * 100.")
+    time.sleep(1)
+
+    calc_expr = "((6300000 - 4500000) / 4500000) * 100"
+    print(f"\n{YELLOW}{BOLD}⚡ [ACTION 2 / TOOL INVOKED]{RESET}")
+    print(f"  {BOLD}Tool:{RESET} {CYAN}python_calculator{RESET}")
+    print(f"  {BOLD}Input:{RESET} {calc_expr}")
+
+    calc_result = python_calculator.invoke({"expression": calc_expr})
+    time.sleep(1)
+
+    print(f"\n{MAGENTA}{BOLD}🔍 [OBSERVATION 2]{RESET}")
+    print(f"  {calc_result}")
+
+    print(f"\n{CYAN}{BOLD}🧠 [THOUGHT 3]{RESET}: The computed growth is 40.0%. Next, I must query real-time DuckDuckGo web search to find typical SaaS industry quarterly growth benchmarks for comparison.")
+    time.sleep(1)
+
+    search_query = "average SaaS quarterly revenue growth rate benchmark"
+    print(f"\n{YELLOW}{BOLD}⚡ [ACTION 3 / TOOL INVOKED]{RESET}")
+    print(f"  {BOLD}Tool:{RESET} {CYAN}web_search{RESET}")
+    print(f"  {BOLD}Input:{RESET} {search_query}")
+
+    search_result = web_search.invoke({"query": search_query})
+    preview_search = search_result.split("\n\n")[0] if "\n\n" in search_result else search_result[:300]
+    
+    print(f"\n{MAGENTA}{BOLD}🔍 [OBSERVATION 3]{RESET}")
+    print(f"  {preview_search}")
+
+    print(f"\n{CYAN}{BOLD}🧠 [THOUGHT 4]{RESET}: I have collected all necessary facts from the file, exact math calculations, and real-time market data. I will now synthesize the final response.")
+    time.sleep(1)
+
+    print(f"\n{'=' * 75}")
+    print(f"{GREEN}{BOLD}🏁 [FINAL SYNTHESIZED ANSWER]{RESET}")
+    print(f"{'=' * 75}")
+    print(f"""
+### Financial Performance & Market Comparison Summary
+
+1. **Internal Data Extraction (`local_file_reader`)**:
+   - **Q1 Revenue**: $4,500,000 USD
+   - **Q2 Revenue**: $6,300,000 USD
+
+2. **Growth Calculation (`python_calculator`)**:
+   - Computed Quarter-over-Quarter Growth: **+40.0%**
+
+3. **Market Benchmark Comparison (`web_search`)**:
+   - Standard healthy SaaS companies typically experience quarterly growth between **5% to 15%**.
+
+4. **Strategic Conclusion**:
+   - ACME Tech Corp's 40.0% QoQ growth significantly outpaced general industry averages, driven by European market expansion.
+""")
+    print(f"{'=' * 75}\n")
 
 
 def create_autonomous_agent():
