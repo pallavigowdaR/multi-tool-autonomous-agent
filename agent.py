@@ -93,9 +93,14 @@ def initialize_llm():
     # 2. Check Google Gemini
     if provider == "gemini" or os.getenv("GOOGLE_API_KEY"):
         from langchain_google_genai import ChatGoogleGenerativeAI
-        model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+        model_name = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
         print(f"{GREEN}✓ Using LLM Provider: Google Gemini ({model_name}){RESET}")
-        return ChatGoogleGenerativeAI(model=model_name, temperature=0)
+        
+        primary_llm = ChatGoogleGenerativeAI(model=model_name, temperature=0, max_retries=5)
+        # Automatic fallback in case of high-demand 503 traffic spikes
+        fallback_model = "gemini-3.1-flash-lite" if model_name != "gemini-3.1-flash-lite" else "gemini-3.6-flash"
+        fallback_llm = ChatGoogleGenerativeAI(model=fallback_model, temperature=0, max_retries=5)
+        return primary_llm.with_fallbacks([fallback_llm])
 
     # 3. Check Groq
     if provider == "groq" or os.getenv("GROQ_API_KEY"):
@@ -259,6 +264,12 @@ def run_query(agent_executor: AgentExecutor, user_query: str):
         )
 
         final_output = response.get("output", "No response generated.")
+        if isinstance(final_output, list):
+            texts = [
+                item.get("text", str(item)) if isinstance(item, dict) else str(item)
+                for item in final_output
+            ]
+            final_output = "\n".join(texts)
         
         print(f"\n{'=' * 75}")
         print(f"{GREEN}{BOLD}🏁 [FINAL SYNTHESIZED ANSWER]{RESET}")
