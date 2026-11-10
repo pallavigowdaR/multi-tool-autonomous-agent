@@ -18,8 +18,12 @@ from dotenv import load_dotenv
 # LangChain imports
 from langchain_core.callbacks.base import BaseCallbackHandler
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+try:
+    from langchain.agents import AgentExecutor, create_tool_calling_agent
+except ImportError:
+    from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
 
 # Local tools
 from tools import get_all_tools
